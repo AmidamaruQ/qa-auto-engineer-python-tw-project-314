@@ -129,3 +129,12 @@ class TasksPage(BasePage):
 
     def get_task_text(self, status, title=None, content=None):
         return self.task(status=status, title=title, content=content).text
+
+    def get_all_task(self, status_value: str) -> list[str]:
+        titles = self.driver.find_elements(
+            By.XPATH,
+            f"//h6[normalize-space()='{status_value}']"
+            f"/following-sibling::div"
+            f"//div[contains(@class,'MuiTypography-h5')]"
+        )
+        return [t.text for t in titles]

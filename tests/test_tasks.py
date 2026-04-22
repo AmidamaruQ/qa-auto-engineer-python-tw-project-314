@@ -37,8 +37,8 @@ def test_create_task(logged_app):
     task_data = build_task_data()
 
     create_task(logged_app, task_data)
-
-    assert_task_presence(logged_app, task_data)
+    titles = logged_app.tasks_page.get_all_task(task_data["status"])
+    assert task_data["title"] in titles
 
 
 # def test_view_task_list(logged_app):
