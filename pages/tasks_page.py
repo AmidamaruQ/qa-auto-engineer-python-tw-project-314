@@ -17,6 +17,7 @@ LABEL_COMBOBOX_LOCATOR = (
     "//div[div/following-sibling::input[@name='label_id']]"
 )
 CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
+BOARD_COLUMNS_LOCATOR = (By.XPATH, "//h6[normalize-space()]")
 
 COMBOBOX_OPTION_XPATH = "//li[contains(text(), '{text}')]"
 STATUS_LABEL_XPATH = "//h6[normalize-space()={status}]"
@@ -118,3 +119,13 @@ class TasksPage(BasePage):
 
     def open_edit_task(self, status, title, content):
         self.edit_task_button(status, title, content).click()
+
+    def get_board_columns(self):
+        return [
+            column.text.strip()
+            for column in self.driver.find_elements(*BOARD_COLUMNS_LOCATOR)
+            if column.text.strip()
+        ]
+
+    def get_task_text(self, status, title=None, content=None):
+        return self.task(status=status, title=title, content=content).text

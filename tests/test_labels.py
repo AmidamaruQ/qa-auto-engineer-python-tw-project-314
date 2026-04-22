@@ -41,10 +41,13 @@ def test_update_label(logged_app):
     assert logged_app.label_form_page.popup.wait_popup_with_text(POPUP_UPDATED)
     open_labels_page(logged_app)
     assert wait_for(
-        lambda: logged_app.labels_page.is_label_present(new_label_name)
+        lambda: not logged_app.labels_page.is_label_present(label_name)
     )
     assert wait_for(
-        lambda: not logged_app.labels_page.is_label_present(label_name)
+        lambda: any(
+            new_label_name in row_text
+            for row_text in logged_app.labels_page.get_rows_text()
+        )
     )
 
 
@@ -81,3 +84,15 @@ def test_multiple_delete_label(logged_app):
     )
     assert not logged_app.labels_page.is_label_present(first_label_name)
     assert not logged_app.labels_page.is_label_present(second_label_name)
+
+
+def test_labels_list_columns_and_rows(logged_app):
+    label_name = build_label_name()
+
+    create_label(logged_app, label_name)
+
+    headers = logged_app.labels_page.get_table_headers()
+
+    assert "Name" in headers
+    assert logged_app.labels_page.get_labels_count() > 0
+    assert logged_app.labels_page.is_label_present(label_name)

@@ -10,6 +10,9 @@ CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH = (ROW_WITH_CURRENT_DATA_XPATH +
 
 CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 DELETE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Delete']")
+TABLE_HEADERS_LOCATOR = (By.XPATH, "//thead//th")
+TABLE_ROWS_LOCATOR = (By.XPATH, "//tbody/tr")
+ROW_WITH_NAME_XPATH = "//tr[.//*[normalize-space()={name}]]"
 
 
 class TaskStatusesPage(BasePage):
@@ -37,6 +40,11 @@ class TaskStatusesPage(BasePage):
                 slug=xpath_literal(slug),
             )))
 
+    def _status_row_by_name(self, name):
+        return self.table_row((By.XPATH, ROW_WITH_NAME_XPATH.format(
+            name=xpath_literal(name),
+        )))
+
     def open_task_from_row(self, name, slug):
         return self._status_row(name, slug).click()
 
@@ -63,3 +71,16 @@ class TaskStatusesPage(BasePage):
 
     def is_task_status_present(self, name, slug):
         return self._status_row(name, slug).is_present()
+
+    def get_table_headers(self):
+        return [
+            header.text.strip()
+            for header in self.driver.find_elements(*TABLE_HEADERS_LOCATOR)
+            if header.text.strip()
+        ]
+
+    def get_statuses_count(self):
+        return len(self.driver.find_elements(*TABLE_ROWS_LOCATOR))
+
+    def get_status_row_text(self, name):
+        return self._status_row_by_name(name).text

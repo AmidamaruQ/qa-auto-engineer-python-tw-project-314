@@ -20,3 +20,7 @@ class BasePage(BaseComponent):
     @property
     def title(self):
         return self.driver.title
+
+    @property
+    def current_url(self):
+        return self.driver.current_url

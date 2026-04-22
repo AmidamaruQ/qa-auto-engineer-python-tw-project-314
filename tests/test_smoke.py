@@ -16,3 +16,11 @@ def test_logout(logged_app):
     logged_app.dashboard_page.header.logout()
 
     assert logged_app.login_page.username_input.is_displayed()
+    assert logged_app.login_page.is_login_page
+
+
+def test_login_empty_credentials(app):
+    app.login_page.login("", "")
+
+    assert app.login_page.username_input.is_displayed()
+    assert app.login_page.is_login_page

@@ -3,6 +3,7 @@ from uuid import uuid4
 POPUP_CREATED = "Element created"
 POPUP_UPDATED = "Element updated"
 POPUP_DELETED = "Element deleted"
+POPUP_INVALID_FORM = "The form is not valid"
 POPUP_BULK_DELETED_TEMPLATE = "{count} elements deleted"
 
 

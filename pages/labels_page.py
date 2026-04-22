@@ -9,6 +9,8 @@ CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH = (ROW_WITH_CURRENT_DATA_XPATH +
 
 CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 DELETE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Delete']")
+TABLE_HEADERS_LOCATOR = (By.XPATH, "//thead//th")
+TABLE_ROWS_LOCATOR = (By.XPATH, "//tbody/tr")
 
 
 class LabelsPage(BasePage):
@@ -49,3 +51,20 @@ class LabelsPage(BasePage):
 
     def is_label_present(self, name):
         return self._label_row(name).is_present()
+
+    def get_table_headers(self):
+        return [
+            header.text.strip()
+            for header in self.driver.find_elements(*TABLE_HEADERS_LOCATOR)
+            if header.text.strip()
+        ]
+
+    def get_labels_count(self):
+        return len(self.driver.find_elements(*TABLE_ROWS_LOCATOR))
+
+    def get_rows_text(self):
+        return [
+            row.text.strip()
+            for row in self.driver.find_elements(*TABLE_ROWS_LOCATOR)
+            if row.text.strip()
+        ]

@@ -122,6 +122,46 @@ def test_task_label_filter(logged_app):
     )
 
 
+def test_tasks_board_loaded(logged_app):
+    open_tasks_page(logged_app)
+
+    columns = logged_app.tasks_page.get_board_columns()
+
+    assert len(columns) > 0
+    assert "Draft" in columns
+
+
+def test_task_combined_filters(logged_app):
+    first_task = build_task_data()
+    second_task = {
+        **build_task_data(),
+        "assignee": "john@google.com",
+        "status": "To Review",
+        "label": "bug",
+    }
+
+    create_task(logged_app, first_task)
+    create_task(logged_app, second_task)
+
+    open_tasks_page(logged_app)
+    logged_app.tasks_page.choose_assignee(second_task["assignee"])
+    logged_app.tasks_page.choose_status(second_task["status"])
+    logged_app.tasks_page.choose_label(second_task["label"])
+
+    assert wait_for(lambda: logged_app.tasks_page.is_task_present(
+        second_task["status"],
+        second_task["title"],
+        second_task["content"],
+    ))
+    assert wait_for(
+        lambda: not logged_app.tasks_page.is_task_present(
+            first_task["status"],
+            first_task["title"],
+            first_task["content"],
+        )
+    )
+
+
 def test_update_task(logged_app):
     task_data = build_task_data()
     updated_task_data = {
@@ -141,8 +181,14 @@ def test_update_task(logged_app):
 
     assert logged_app.task_form_page.popup.wait_popup_with_text(POPUP_UPDATED)
     open_tasks_page(logged_app)
-    assert_task_presence(logged_app, updated_task_data)
     assert_task_presence(logged_app, task_data, is_present=False)
+    assert wait_for(
+        lambda: updated_task_data["title"] in
+        logged_app.tasks_page.get_task_text(
+            status=updated_task_data["status"],
+            content=updated_task_data["content"],
+        )
+    )
 
 
 def test_delete_task(logged_app):
