@@ -5,7 +5,13 @@ from elements import ButtonElement
 
 PROFILE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Profile']")
 HEADER_TITLE_LOCATOR = (By.XPATH, "//h6[@id='react-admin-title']")
-LOGOUT_BUTTON_LOCATOR = (By.XPATH, "//span[contains(text(), 'Logout')]")
+LOGOUT_BUTTON_LOCATOR = (
+        By.XPATH,
+        "//*[self::a or self::li or self::button]["
+        "contains(normalize-space(), 'Logout') or "
+        "contains(normalize-space(), 'Sign out') or "
+        "contains(normalize-space(), 'Log out')]",
+    )
 
 
 class Header(BaseComponent):
