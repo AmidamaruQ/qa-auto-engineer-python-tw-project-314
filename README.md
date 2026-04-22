@@ -1,22 +1,42 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/AmidamaruQ/qa-auto-engineer-python-tw-project-314/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/AmidamaruQ/qa-auto-engineer-python-tw-project-314/actions)
 
-## UI test framework
+[![CI](https://github.com/AmidamaruQ/qa-auto-engineer-python-tw-project-314/actions/workflows/build.yml/badge.svg)](https://github.com/AmidamaruQ/qa-auto-engineer-python-tw-project-314/actions/workflows/build.yml)
 
-Stack:
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AmidamaruQ_qa-auto-engineer-python-tw-project-314&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AmidamaruQ_qa-auto-engineer-python-tw-project-314)
+
+## О проекте
+
+UI automation проект на `pytest` и `selenium` для тестирования kanban-приложения.
+
+## Стек
+
+- `Python`
 - `pytest`
-- `python-dotenv`
 - `selenium`
+- `uv`
+- `docker`
 
-Environment setup:
+## Быстрый старт
 
 ```bash
 cp .env.example .env
+uv sync
 ```
 
-Available variables:
-- `APP_BASE_URL` - base URL for UI tests
+В `.env` должны быть заданы:
+- `APP_BASE_URL`
+- `LOGIN`
+- `PASSWORD`
 
-Available fixtures:
-- `env_config` - loads variables from `.env`
-- `base_url` - returns `--base-url`, then `APP_BASE_URL`, then default `http://127.0.0.1:5173`
+## Команды
+
+```bash
+make install
+make start
+make test
+make lint
+make build
+```
+
+`make build` поднимает контейнер приложения, дожидается его готовности и запускает тесты.
