@@ -57,7 +57,9 @@ def test_update_user(logged_app):
         user_data["first_name"],
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
-    logged_app.user_form_page.sidebar.open_users_page()
+    assert logged_app.label_form_page.popup.wait_popup_with_text(
+        "Element updated")
+
 
 
 def test_delete_user(logged_app):
