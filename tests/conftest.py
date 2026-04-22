@@ -22,24 +22,43 @@ def pytest_addoption(parser):
 def setup_logging():
     configure_logging()
 
+
 @pytest.fixture(scope="session")
-def base_url():
-    """В CI используется IMPLEMENTATION"""
+def base_url(request):
     implementation = os.getenv("IMPLEMENTATION")
+    option_value = request.config.getoption("--base-url")
+
+    if option_value:
+        return option_value
 
     if implementation:
         return f"http://{implementation}.test"
 
-    """Базовый адрес тестируемого сайта"""
     return os.getenv("APP_BASE_URL", "http://localhost:5173")
 
 
+@pytest.fixture(scope="session")
+def credentials():
+    return {
+        "username": os.getenv("LOGIN", "admin"),
+        "password": os.getenv("PASSWORD", "adminhexlet1122"),
+    }
+
+
+@pytest.fixture(scope="session")
+def expected_profile_name():
+    return os.getenv("PROFILE_NAME", "Jane Doe")
+
+
 @pytest.fixture
-def driver(request):
+def driver():
     logger = get_logger("driver")
     options = Options()
-    # Chromium runs inside a Linux container in CI, so it needs headless-safe flags.
-    options.binary_location = os.getenv("CHROME_BINARY", "/usr/bin/chromium")
+    chrome_binary = os.getenv("CHROME_BINARY")
+
+    if chrome_binary:
+        options.binary_location = chrome_binary
+
     options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-gpu")
@@ -49,8 +68,11 @@ def driver(request):
     options.add_argument("--disable-software-rasterizer")
 
     logger.info("Starting Chrome browser")
-    service = Service(
-        executable_path=os.getenv("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
+    chromedriver_path = os.getenv("CHROMEDRIVER_PATH")
+    service = (
+        Service(executable_path=chromedriver_path)
+        if chromedriver_path
+        else Service()
     )
     browser = webdriver.Chrome(service=service, options=options)
     yield browser
@@ -68,8 +90,8 @@ def app(driver, base_url):
 
 
 @pytest.fixture
-def logged_app(app):
+def logged_app(app, credentials):
     logger = get_logger("app")
     logger.info("Authorizing test user")
-    app.login_page.login("admin", "adminhexlet1122")
+    app.login_page.login(credentials["username"], credentials["password"])
     return app

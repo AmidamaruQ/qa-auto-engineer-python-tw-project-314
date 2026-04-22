@@ -1,13 +1,14 @@
 from selenium.webdriver.common.by import By
 
 from pages.base_page import BasePage
+from utils import xpath_literal
 
 CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 DELETE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Delete']")
 
-ROW_WITH_CURRENT_DATA_XPATH = ("//tr[.//span[contains(text(), '{email}')] "
-                               "and .//span[contains(text(), '{first_name}')] "
-                               "and .//span[contains(text(), '{second_name}')]]"
+ROW_WITH_CURRENT_DATA_XPATH = ("//tr[.//*[normalize-space()={email}] "
+                               "and .//*[normalize-space()={first_name}] "
+                               "and .//*[normalize-space()={second_name}]]"
                                )
 CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH = (ROW_WITH_CURRENT_DATA_XPATH
                                         + "//td[.//input[@type='checkbox']]")
@@ -26,14 +27,15 @@ class UsersPage(BasePage):
     def _checkbox_user_row(self, email, first_name, second_name):
         return self.input(
             (By.XPATH, CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH.format(
-                email=email,
-                first_name=first_name,
-                second_name=second_name)))
+                email=xpath_literal(email),
+                first_name=xpath_literal(first_name),
+                second_name=xpath_literal(second_name))))
 
     def _user_row(self, email, first_name, second_name):
         return self.table_row((By.XPATH, ROW_WITH_CURRENT_DATA_XPATH.format(
-            email=email, first_name=first_name,
-            second_name=second_name)))
+            email=xpath_literal(email),
+            first_name=xpath_literal(first_name),
+            second_name=xpath_literal(second_name))))
 
     def open_create_user_form(self):
         return self.create_button.click()

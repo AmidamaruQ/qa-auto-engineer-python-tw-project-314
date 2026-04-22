@@ -1,5 +1,3 @@
-from selenium.webdriver import Keys
-
 from elements.base_element import BaseElement
 
 
@@ -14,6 +12,6 @@ class InputElement(BaseElement):
         return self.element.get_attribute("value")
 
     def _clear_element(self):
-        self.element.click()
-        self.element.send_keys(Keys.COMMAND, "a")  # macOS
-        self.element.send_keys(Keys.BACKSPACE)
+        element = self.element
+        element.click()
+        element.clear()

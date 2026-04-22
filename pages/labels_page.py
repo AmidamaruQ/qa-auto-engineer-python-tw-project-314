@@ -1,8 +1,9 @@
 from selenium.webdriver.common.by import By
 
 from pages.base_page import BasePage
+from utils import xpath_literal
 
-ROW_WITH_CURRENT_DATA_XPATH = "//tr[.//span[contains(text(), '{name}')]]"
+ROW_WITH_CURRENT_DATA_XPATH = "//tr[.//*[normalize-space()={name}]]"
 CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH = (ROW_WITH_CURRENT_DATA_XPATH +
                                         "//td[.//input[@type='checkbox']]")
 
@@ -22,12 +23,16 @@ class LabelsPage(BasePage):
 
     def _label_row(self, name):
         return self.table_row(
-            (By.XPATH, ROW_WITH_CURRENT_DATA_XPATH.format(name=name))
+            (By.XPATH, ROW_WITH_CURRENT_DATA_XPATH.format(
+                name=xpath_literal(name))
+             )
         )
 
     def _checkbox_row(self, name):
         return self.input(
-            (By.XPATH, CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH.format(name=name))
+            (By.XPATH, CHECKBOX_ROW_WITH_CURRENT_DATA_XPATH.format(
+                name=xpath_literal(name))
+             )
         )
 
     def open_label_from_row(self, name):

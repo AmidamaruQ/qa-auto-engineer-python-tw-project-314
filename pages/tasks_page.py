@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 
 from pages.base_page import BasePage
+from utils import xpath_literal
 from utils.utils import wait_for
 
 ASSIGNEE_COMBOBOX_LOCATOR = (
@@ -17,12 +18,8 @@ LABEL_COMBOBOX_LOCATOR = (
 )
 CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 
-TASK_XPATH = ("//div[./h6[contains(text(), '{status}')]]"
-              "//div[.//div[contains(text(), '{title}')] and "
-              "./p[contains(text(), '{content}')]]/parent::div")
 COMBOBOX_OPTION_XPATH = "//li[contains(text(), '{text}')]"
-EDIT_BUTTON_XPATH = TASK_XPATH + "//a[@aria-label='Edit']"
-STATUS_LABEL_XPATH = "//h6[contains(text(), '{status}')]"
+STATUS_LABEL_XPATH = "//h6[normalize-space()={status}]"
 
 
 class TasksPage(BasePage):
@@ -44,17 +41,50 @@ class TasksPage(BasePage):
         return self.button(CREATE_BUTTON_LOCATOR)
 
     def status_label(self, status):
-        return self.label((By.XPATH, STATUS_LABEL_XPATH.format(status=status)))
+        return self.label((By.XPATH, STATUS_LABEL_XPATH.format(
+            status=xpath_literal(status),
+        )))
 
-    def task(self, status, title, content):
-        return self.table_row((By.XPATH, TASK_XPATH.format(
-            status=status, title=title, content=content))
-                              )
+    def _task_xpath(self, status=None, title=None, content=None):
+        section_xpath = "//div[./h6]"
+        card_conditions = []
+
+        if status:
+            section_xpath = (
+                f"//div[./h6[normalize-space()={xpath_literal(status)}]]"
+            )
+
+        if title:
+            card_conditions.append(
+                f".//div[normalize-space()={xpath_literal(title)}]"
+            )
+
+        if content:
+            card_conditions.append(
+                f"./p[normalize-space()={xpath_literal(content)}]"
+            )
+
+        task_xpath = section_xpath + "//div"
+
+        if card_conditions:
+            predicates = " and ".join(card_conditions)
+            task_xpath += f"[{predicates}]"
+
+        return task_xpath + "/parent::div"
+
+    def task(self, status=None, title=None, content=None):
+        return self.table_row((By.XPATH, self._task_xpath(
+            status=status,
+            title=title,
+            content=content,
+        )))
 
     def edit_task_button(self, status, title, content):
-        return self.button((By.XPATH, EDIT_BUTTON_XPATH.format(
-            status=status, title=title, content=content))
-                           )
+        return self.button((By.XPATH, self._task_xpath(
+            status=status,
+            title=title,
+            content=content,
+        ) + "//a[@aria-label='Edit']"))
 
     def open_create_task(self):
         return self.create_button.click()
@@ -68,7 +98,7 @@ class TasksPage(BasePage):
     def select_option(self, text):
         return self.combobox_option(text).click()
 
-    def get_tasks_count(self, status, title, content):
+    def get_tasks_count(self, status=None, title=None, content=None):
         return len(self.task(status, title, content).find_elements())
 
     def choose_assignee(self, mail):
