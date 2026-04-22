@@ -1,3 +1,5 @@
+from selenium.webdriver import Keys
+
 from elements.base_element import BaseElement
 
 
@@ -15,3 +17,7 @@ class InputElement(BaseElement):
         element = self.element
         element.click()
         element.clear()
+
+        if element.get_attribute("value"):
+            element.send_keys(Keys.CONTROL, "a")
+            element.send_keys(Keys.BACKSPACE)
