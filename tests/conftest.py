@@ -59,7 +59,7 @@ def driver():
     if chrome_binary:
         options.binary_location = chrome_binary
 
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")

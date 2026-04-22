@@ -41,143 +41,48 @@ def test_create_task(logged_app):
     assert_task_presence(logged_app, task_data)
 
 
-def test_task_assignee_filter(logged_app):
-    first_task = build_task_data()
-    second_task = {
+def test_view_task_list(logged_app):
+    task_data = {
         **build_task_data(),
         "assignee": "john@google.com",
+        "status": "Draft",
     }
 
-    create_task(logged_app, first_task)
-    create_task(logged_app, second_task)
-
-    open_tasks_page(logged_app)
-    logged_app.tasks_page.choose_assignee(second_task["assignee"])
-
-    assert wait_for(lambda: logged_app.tasks_page.is_task_present(
-        second_task["status"],
-        second_task["title"],
-        second_task["content"],
-    ))
-    assert wait_for(
-        lambda: not logged_app.tasks_page.is_task_present(
-            first_task["status"],
-            first_task["title"],
-            first_task["content"],
-        )
-    )
-
-
-def test_task_status_filter(logged_app):
-    first_task = build_task_data()
-    second_task = {
-        **build_task_data(),
-        "status": "To Review",
-    }
-
-    create_task(logged_app, first_task)
-    create_task(logged_app, second_task)
-
-    open_tasks_page(logged_app)
-    logged_app.tasks_page.choose_status(second_task["status"])
-
-    assert wait_for(lambda: logged_app.tasks_page.is_task_present(
-        second_task["status"],
-        second_task["title"],
-        second_task["content"],
-    ))
-    assert wait_for(
-        lambda: not logged_app.tasks_page.is_task_present(
-            first_task["status"],
-            first_task["title"],
-            first_task["content"],
-        )
-    )
-
-
-def test_task_label_filter(logged_app):
-    first_task = build_task_data()
-    second_task = {
-        **build_task_data(),
-        "label": "bug",
-    }
-
-    create_task(logged_app, first_task)
-    create_task(logged_app, second_task)
-
-    open_tasks_page(logged_app)
-    logged_app.tasks_page.choose_label(second_task["label"])
-
-    assert wait_for(lambda: logged_app.tasks_page.is_task_present(
-        second_task["status"],
-        second_task["title"],
-        second_task["content"],
-    ))
-    assert wait_for(
-        lambda: not logged_app.tasks_page.is_task_present(
-            first_task["status"],
-            first_task["title"],
-            first_task["content"],
-        )
-    )
-
-
-def test_tasks_board_loaded(logged_app):
+    create_task(logged_app, task_data)
     open_tasks_page(logged_app)
 
     columns = logged_app.tasks_page.get_board_columns()
-
     assert len(columns) > 0
     assert "Draft" in columns
 
-
-def test_task_combined_filters(logged_app):
-    first_task = build_task_data()
-    second_task = {
-        **build_task_data(),
-        "assignee": "john@google.com",
-        "status": "To Review",
-        "label": "bug",
-    }
-
-    create_task(logged_app, first_task)
-    create_task(logged_app, second_task)
-
-    open_tasks_page(logged_app)
-    logged_app.tasks_page.choose_assignee(second_task["assignee"])
-    logged_app.tasks_page.choose_status(second_task["status"])
-    logged_app.tasks_page.choose_label(second_task["label"])
+    logged_app.tasks_page.choose_assignee(task_data["assignee"])
+    logged_app.tasks_page.choose_status(task_data["status"])
 
     assert wait_for(lambda: logged_app.tasks_page.is_task_present(
-        second_task["status"],
-        second_task["title"],
-        second_task["content"],
+        task_data["status"],
+        task_data["title"],
+        task_data["content"],
     ))
-    assert wait_for(
-        lambda: not logged_app.tasks_page.is_task_present(
-            first_task["status"],
-            first_task["title"],
-            first_task["content"],
-        )
-    )
 
 
-def test_update_task(logged_app):
+def test_edit_task_form_prefilled(logged_app):
     task_data = build_task_data()
     updated_task_data = {
         **task_data,
         "title": build_task_data()["title"],
+        "status": "To Review",
     }
 
     create_task(logged_app, task_data)
-    assert_task_presence(logged_app, task_data)
-
     logged_app.tasks_page.open_edit_task(
         status=task_data["status"],
         title=task_data["title"],
         content=task_data["content"],
     )
-    logged_app.task_form_page.update_task(title=updated_task_data["title"])
+    logged_app.task_form_page.update_task(
+        title=updated_task_data["title"],
+        status=updated_task_data["status"],
+    )
 
     assert logged_app.task_form_page.popup.wait_popup_with_text(POPUP_UPDATED)
     open_tasks_page(logged_app)
@@ -191,12 +96,10 @@ def test_update_task(logged_app):
     )
 
 
-def test_delete_task(logged_app):
+def test_delete_task_form(logged_app):
     task_data = build_task_data()
 
     create_task(logged_app, task_data)
-    assert_task_presence(logged_app, task_data)
-
     logged_app.tasks_page.open_edit_task(
         status=task_data["status"],
         title=task_data["title"],

@@ -7,11 +7,6 @@ FIRST_NAME_INPUT_LOCATOR = (By.XPATH, '//input[@name="firstName"]')
 LAST_NAME_INPUT_LOCATOR = (By.XPATH, '//input[@name="lastName"]')
 SAVE_BUTTON_LOCATOR = (By.XPATH, '//button[@aria-label="Save"]')
 DELETE_BUTTON_LOCATOR = (By.XPATH, '//button[@aria-label="Delete"]')
-EMAIL_ERROR_LOCATOR = (
-    By.XPATH,
-    "//*[contains(@class, 'MuiFormHelperText-root') and "
-    "contains(text(), 'email')]",
-)
 
 
 class UserFormPage(BasePage):
@@ -66,7 +61,3 @@ class UserFormPage(BasePage):
     @property
     def last_name_value(self):
         return self.last_name_input.value
-
-    @property
-    def email_error(self):
-        return self.label(EMAIL_ERROR_LOCATOR)

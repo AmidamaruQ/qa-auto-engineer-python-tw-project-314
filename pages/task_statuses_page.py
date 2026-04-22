@@ -12,6 +12,7 @@ CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 DELETE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Delete']")
 TABLE_HEADERS_LOCATOR = (By.XPATH, "//thead//th")
 TABLE_ROWS_LOCATOR = (By.XPATH, "//tbody/tr")
+ROW_CHECKBOXES_LOCATOR = (By.XPATH, "//tbody//input[@type='checkbox']")
 ROW_WITH_NAME_XPATH = "//tr[.//*[normalize-space()={name}]]"
 
 
@@ -68,6 +69,12 @@ class TaskStatusesPage(BasePage):
 
     def delete_chosen_statuses(self):
         return self.delete_chosen_task()
+
+    def choose_all_statuses(self):
+        checkboxes = self.driver.find_elements(*ROW_CHECKBOXES_LOCATOR)
+
+        for checkbox in checkboxes:
+            checkbox.click()
 
     def is_task_status_present(self, name, slug):
         return self._status_row(name, slug).is_present()

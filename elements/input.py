@@ -1,5 +1,3 @@
-from selenium.webdriver import Keys
-
 from elements.base_element import BaseElement
 
 
@@ -19,5 +17,18 @@ class InputElement(BaseElement):
         element.clear()
 
         if element.get_attribute("value"):
-            element.send_keys(Keys.CONTROL, "a")
-            element.send_keys(Keys.BACKSPACE)
+            self.driver.execute_script(
+                """
+                const input = arguments[0];
+                const prototype = Object.getPrototypeOf(input);
+                const descriptor = Object.getOwnPropertyDescriptor(
+                  prototype,
+                  "value",
+                );
+
+                descriptor.set.call(input, "");
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+                """,
+                element,
+            )
