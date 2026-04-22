@@ -57,8 +57,12 @@ def test_update_user(logged_app):
         user_data["first_name"],
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
-    assert logged_app.label_form_page.popup.wait_popup_with_text(
-        "Element updated")
+    logged_app.user_form_page.sidebar.open_users_page()
+    assert logged_app.users_page.is_user_present(
+        new_user_email,
+        user_data["first_name"],
+        user_data["second_name"]
+    )
 
 
 
