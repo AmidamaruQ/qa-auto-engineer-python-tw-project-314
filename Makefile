@@ -1,4 +1,4 @@
-.PHONY: install start check lint test test-coverage coverage-xml test-smoke test-auth test-users test-statuses test-labels test-tasks
+.PHONY: install start check lint test test-coverage coverage-xml
 
 install:
 	uv sync --group dev

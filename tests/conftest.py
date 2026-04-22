@@ -23,11 +23,15 @@ def setup_logging():
     configure_logging()
 
 @pytest.fixture(scope="session")
-def base_url(request):
-    return (
-        os.getenv("APP_BASE_URL")
-        or "http://server"
-    )
+def base_url():
+    """В CI используется IMPLEMENTATION"""
+    implementation = os.getenv("IMPLEMENTATION")
+
+    if implementation:
+        return f"http://{implementation}.test"
+
+    """Базовый адрес тестируемого сайта"""
+    return os.getenv("APP_BASE_URL", "http://localhost:5173")
 
 
 @pytest.fixture
