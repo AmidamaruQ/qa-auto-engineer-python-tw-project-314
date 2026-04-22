@@ -1,128 +1,111 @@
+from tests.support import (
+    POPUP_BULK_DELETED_TEMPLATE,
+    POPUP_CREATED,
+    POPUP_DELETED,
+    POPUP_UPDATED,
+    build_status_data,
+)
+from utils.utils import wait_for
+
+
+def open_statuses_page(app):
+    app.base_page.sidebar.open_task_statuses_page()
+
+
+def create_status(app, status_data):
+    open_statuses_page(app)
+    app.task_statuses_page.open_create_status()
+    app.task_statuses_form_page.create_task_status(
+        status_data["name"],
+        status_data["slug"],
+    )
+    assert app.task_statuses_form_page.popup.wait_popup_with_text(POPUP_CREATED)
+    open_statuses_page(app)
+
+
 def test_create_status(logged_app):
-    # Arrange: prepare task status data.
-    task_status_data = {
-        "name": "name",
-        "slug": "slug"
-    }
-    # Act: open the status form and create a task status.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.open_create_task()
-    logged_app.task_statuses_form_page.create_task_status(
-        task_status_data["name"],
-        task_status_data["slug"])
-    # Assert: verify the creation popup is shown.
-    assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element created")
-    # Assert: verify the created task status is present in the table.
-    logged_app.task_statuses_form_page.sidebar.open_task_statuses_page()
+    status_data = build_status_data()
+
+    create_status(logged_app, status_data)
+
     assert logged_app.task_statuses_page.is_task_status_present(
-        task_status_data["name"], task_status_data["slug"])
+        status_data["name"],
+        status_data["slug"],
+    )
 
 
-def test_update_status(logged_app):
-    # Arrange: prepare source and updated task status data.
-    task_status_data = {
-        "name": "name",
-        "slug": "slug"
-    }
-    updated_slug = "updated_slug"
+def test_view_status_list(logged_app):
+    status_data = build_status_data()
 
-    # Act: create the initial task status.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.open_create_task()
-    logged_app.task_statuses_form_page.create_task_status(
-        task_status_data["name"],
-        task_status_data["slug"])
-    # Assert: verify the original task status is present before editing.
-    assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element created")
-    logged_app.task_statuses_form_page.sidebar.open_task_statuses_page()
+    create_status(logged_app, status_data)
+
+    headers = logged_app.task_statuses_page.get_table_headers()
+
+    assert "Name" in headers
+    assert "Slug" in headers
+    assert logged_app.task_statuses_page.get_statuses_count() > 0
     assert logged_app.task_statuses_page.is_task_status_present(
-        task_status_data["name"], task_status_data["slug"])
-    # Act: open the task status and update its slug.
-    logged_app.task_statuses_page.open_task_from_row(task_status_data["name"],
-                                                     task_status_data["slug"])
-    logged_app.task_statuses_form_page.update_task_status_info(
-        task_status_data["name"], updated_slug)
-    # Assert: verify the updated task status is present in the table.
+        status_data["name"],
+        status_data["slug"],
+    )
+
+
+def test_edit_status_form_prefilled(logged_app):
+    status_data = build_status_data()
+    updated_slug = build_status_data()["slug"]
+
+    create_status(logged_app, status_data)
+    logged_app.task_statuses_page.open_status_from_row(
+        status_data["name"],
+        status_data["slug"],
+    )
+    logged_app.task_statuses_form_page.update_task_status_info(slug=updated_slug)
+
     assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element updated")
-    logged_app.task_statuses_page.is_task_status_present(
-        task_status_data["name"], updated_slug)
+        POPUP_UPDATED
+    )
+    open_statuses_page(logged_app)
+    assert wait_for(
+        lambda: not logged_app.task_statuses_page.is_task_status_present(
+            status_data["name"],
+            status_data["slug"],
+        )
+    )
+    assert wait_for(
+        lambda: updated_slug in
+        logged_app.task_statuses_page.get_status_row_text(status_data["name"])
+    )
 
 
-def test_delete_task_status(logged_app):
-    # Arrange: prepare task status data.
-    task_status_data = {
-        "name": "name",
-        "slug": "slug"
-    }
-    # Act: create the task status that will be deleted.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.open_create_task()
-    logged_app.task_statuses_form_page.create_task_status(
-        task_status_data["name"],
-        task_status_data["slug"])
-    # Assert: verify the task status exists before deletion.
-    assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element created")
-    logged_app.task_statuses_form_page.sidebar.open_task_statuses_page()
-    assert logged_app.task_statuses_page.is_task_status_present(
-        task_status_data["name"], task_status_data["slug"])
-    # Act: open the task status and delete it.
-    logged_app.task_statuses_page.open_task_from_row(task_status_data["name"],
-                                                     task_status_data["slug"])
+def test_delete_status_form(logged_app):
+    status_data = build_status_data()
 
+    create_status(logged_app, status_data)
+    logged_app.task_statuses_page.open_status_from_row(
+        status_data["name"],
+        status_data["slug"],
+    )
     logged_app.task_statuses_form_page.delete_task_status()
-    # Assert: verify the task status is removed from the table.
+
     assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element deleted")
+        POPUP_DELETED
+    )
+    open_statuses_page(logged_app)
     assert not logged_app.task_statuses_page.is_task_status_present(
-        task_status_data["name"], task_status_data["slug"])
+        status_data["name"],
+        status_data["slug"],
+    )
 
 
-def test_multiple_delete_task_status(logged_app):
-    # Arrange: prepare data for two task statuses.
-    first_task_status_data = {
-        "name": "name",
-        "slug": "slug"
-    }
-    second_task_status_data = {
-        "name": "name2",
-        "slug": "slug2"
-    }
-    # Act: create the first task status.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.open_create_task()
-    logged_app.task_statuses_form_page.create_task_status(
-        first_task_status_data["name"],
-        first_task_status_data["slug"])
-    # Assert: verify the first task status creation succeeds.
+def test_delete_all_status(logged_app):
+    open_statuses_page(logged_app)
+    initial_count = logged_app.task_statuses_page.get_statuses_count()
+
+    assert initial_count > 0
+
+    logged_app.task_statuses_page.choose_all_statuses()
+    logged_app.task_statuses_page.delete_chosen_statuses()
     assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element created")
-
-    # Act: create the second task status.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.open_create_task()
-    logged_app.task_statuses_form_page.create_task_status(
-        second_task_status_data["name"],
-        second_task_status_data["slug"])
-    # Assert: verify the second task status creation succeeds.
-    assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "Element created")
-
-    # Act: select both task statuses and delete them in bulk.
-    logged_app.base_page.sidebar.open_task_statuses_page()
-    logged_app.task_statuses_page.choose_task_from_row(
-        first_task_status_data["name"], first_task_status_data["slug"])
-    logged_app.task_statuses_page.choose_task_from_row(
-        second_task_status_data["name"], second_task_status_data["slug"])
-    logged_app.task_statuses_page.delete_chosen_task()
-    # Assert: verify both task statuses are removed from the table.
-    assert logged_app.task_statuses_form_page.popup.wait_popup_with_text(
-        "2 elements deleted")
-
-    assert not logged_app.task_statuses_page.is_task_status_present(
-        first_task_status_data["name"], first_task_status_data["slug"])
-    assert not logged_app.task_statuses_page.is_task_status_present(
-        second_task_status_data["name"], second_task_status_data["slug"])
+        POPUP_BULK_DELETED_TEMPLATE.format(count=initial_count)
+    )
+    assert logged_app.task_statuses_page.get_statuses_count() == 0

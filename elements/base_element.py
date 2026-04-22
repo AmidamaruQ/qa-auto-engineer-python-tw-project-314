@@ -1,3 +1,4 @@
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -41,7 +42,19 @@ class BaseElement:
         element = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(self.locator)
         )
-        element.click()
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+            element,
+        )
+
+        try:
+            element.click()
+        except ElementClickInterceptedException:
+            self.logger.info(
+                "Native click intercepted, falling back to JavaScript: %s",
+                self.locator,
+            )
+            self.driver.execute_script("arguments[0].click();", element)
 
     def send_keys(self, text):
         self.logger.info("Sending keys: %s", text)

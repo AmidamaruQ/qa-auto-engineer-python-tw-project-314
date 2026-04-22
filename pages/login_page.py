@@ -20,6 +20,10 @@ class LoginPage(BasePage):
     def submit_button(self):
         return self.button(SUBMIT_BUTTON_LOCATOR)
 
+    @property
+    def is_login_page(self):
+        return "/login" in self.current_url
+
     def type_username(self, username):
         self.logger.info("Typing username")
         return self.username_input.fill(username)

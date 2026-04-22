@@ -20,14 +20,22 @@ UI automation проект на `pytest` и `selenium` для тестирова
 ## Быстрый старт
 
 ```bash
-cp .env.example .env
-uv sync
+uv sync --group dev
 ```
 
-В `.env` должны быть заданы:
+Для локального запуска тестов нужны:
 - `APP_BASE_URL`
 - `LOGIN`
 - `PASSWORD`
+- `CHROME_BINARY` при нестандартном пути до Chrome/Chromium
+- `CHROMEDRIVER_PATH`, если вы не хотите использовать Selenium Manager
+
+Пример локального запуска против контейнера с приложением:
+
+```bash
+make start
+APP_BASE_URL=http://localhost:5173 uv run pytest
+```
 
 ## Команды
 
@@ -36,7 +44,4 @@ make install
 make start
 make test
 make lint
-make build
 ```
-
-`make build` поднимает контейнер приложения, дожидается его готовности и запускает тесты.

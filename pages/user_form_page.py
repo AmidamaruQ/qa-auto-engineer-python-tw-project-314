@@ -49,3 +49,15 @@ class UserFormPage(BasePage):
 
     def delete_user(self):
         return self.delete_button.click()
+
+    @property
+    def email_value(self):
+        return self.email_input.value
+
+    @property
+    def first_name_value(self):
+        return self.first_name_input.value
+
+    @property
+    def last_name_value(self):
+        return self.last_name_input.value
