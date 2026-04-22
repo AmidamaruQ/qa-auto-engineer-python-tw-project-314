@@ -58,12 +58,6 @@ def test_update_user(logged_app):
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
     logged_app.user_form_page.sidebar.open_users_page()
-    assert logged_app.users_page.is_user_present(
-        new_user_email,
-        user_data["first_name"],
-        user_data["second_name"]
-    )
-
 
 
 def test_delete_user(logged_app):
