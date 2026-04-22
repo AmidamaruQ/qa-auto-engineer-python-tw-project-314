@@ -37,7 +37,7 @@ def driver(request):
     # Chromium runs inside a Linux container in CI, so it needs headless-safe flags.
     options.binary_location = os.getenv("CHROME_BINARY", "/usr/bin/chromium")
     options.add_argument("--headless=new")
-    options.add_argument("--window-size=1440,900")
+    options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")

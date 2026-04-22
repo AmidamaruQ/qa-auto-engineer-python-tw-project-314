@@ -25,7 +25,7 @@ def test_create_user(logged_app):
     )
 
 
-def test_update_useer(logged_app):
+def test_update_user(logged_app):
     # Arrange: prepare source and updated user data.
     user_data = {
         "email": "email@mail.com",
@@ -57,7 +57,6 @@ def test_update_useer(logged_app):
         user_data["first_name"],
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
-
     assert logged_app.label_form_page.popup.wait_popup_with_text(
         "Element updated")
     # Assert: verify the updated user is present in the table.
