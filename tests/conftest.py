@@ -3,6 +3,7 @@ import os
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 from pages.pages import Pages
 from utils import configure_logging, get_logger
@@ -33,12 +34,21 @@ def base_url(request):
 def driver(request):
     logger = get_logger("driver")
     options = Options()
+    # Chromium runs inside a Linux container in CI, so it needs headless-safe flags.
+    options.binary_location = os.getenv("CHROME_BINARY", "/usr/bin/chromium")
+    options.add_argument("--headless=new")
     options.add_argument("--window-size=1440,900")
+    options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
+    options.add_argument("--remote-debugging-port=9222")
+    options.add_argument("--disable-software-rasterizer")
 
     logger.info("Starting Chrome browser")
-    browser = webdriver.Chrome(options=options)
+    service = Service(
+        executable_path=os.getenv("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
+    )
+    browser = webdriver.Chrome(service=service, options=options)
     yield browser
     logger.info("Closing Chrome browser")
     browser.quit()
