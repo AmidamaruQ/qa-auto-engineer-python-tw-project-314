@@ -91,7 +91,7 @@ class TasksPage(BasePage):
         return self.create_button.click()
 
     def is_task_present(self, status, title, content):
-        return self.task(status, title, content).is_present()
+        return self.task(status, title, content).is_displayed()
 
     def combobox_option(self, text):
         return self.button((By.XPATH, COMBOBOX_OPTION_XPATH.format(text=text)))

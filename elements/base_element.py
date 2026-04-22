@@ -35,7 +35,8 @@ class BaseElement:
         return any(element.is_displayed() for element in elements)
 
     def is_displayed(self):
-        return self.element.is_displayed()
+        element = self.element
+        return element.is_displayed()
 
     def click(self):
         self.logger.info("Clicking element: %s", self.locator)
