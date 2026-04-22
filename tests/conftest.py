@@ -1,7 +1,6 @@
 import os
 
 import pytest
-from dotenv import dotenv_values, load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -22,22 +21,10 @@ def pytest_addoption(parser):
 def setup_logging():
     configure_logging()
 
-
 @pytest.fixture(scope="session")
-def env():
-    load_dotenv()
-    return {
-        key: value
-        for key, value in dotenv_values().items()
-        if value is not None
-    }
-
-
-@pytest.fixture(scope="session")
-def base_url(request, env):
+def base_url(request):
     return (
-        env.get("APP_BASE_URL")
-        or os.getenv("APP_BASE_URL")
+        os.getenv("APP_BASE_URL")
         or "http://127.0.0.1:5173"
     )
 
@@ -67,8 +54,8 @@ def app(driver, base_url):
 
 
 @pytest.fixture
-def logged_app(app, env):
+def logged_app(app):
     logger = get_logger("app")
     logger.info("Authorizing test user")
-    app.login_page.login(env["LOGIN"], env["PASSWORD"])
+    app.login_page.login("admin", "adminhexlet1122")
     return app

@@ -1,9 +1,9 @@
 import pytest
 
 
-def test_login(app, env):
+def test_login(app):
     # Act: log in with configured credentials.
-    app.login_page.login(env["LOGIN"], env["PASSWORD"])
+    app.login_page.login("admin", "hexletadmin1122")
     # Assert: verify the dashboard is opened for the user.
     assert app.dashboard_page.header.header_title.is_displayed()
     assert (app.dashboard_page.header.header_title.text ==
