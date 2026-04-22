@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 
 from pages.base_page import BasePage
+from utils.utils import wait_for
 
 ASSIGNEE_COMBOBOX_LOCATOR = (
     By.XPATH,
@@ -72,14 +73,17 @@ class TasksPage(BasePage):
 
     def choose_assignee(self, mail):
         self.assignee_combobox.click()
+        wait_for(lambda: self.combobox_option(mail).is_present())
         self.select_option(mail)
 
     def choose_status(self, status):
         self.status_combobox.click()
+        wait_for(lambda: self.combobox_option(status).is_present())
         self.select_option(status)
 
     def choose_label(self, label):
         self.label_combobox.click()
+        wait_for(lambda: self.combobox_option(label).is_present())
         self.select_option(label)
 
     def open_edit_task(self, status, title, content):
