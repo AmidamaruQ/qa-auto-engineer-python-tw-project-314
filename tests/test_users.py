@@ -58,6 +58,8 @@ def test_update_useer(logged_app):
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
 
+    assert logged_app.label_form_page.popup.wait_popup_with_text(
+        "Element updated")
     # Assert: verify the updated user is present in the table.
     logged_app.user_form_page.sidebar.open_users_page()
     assert logged_app.users_page.is_user_present(
