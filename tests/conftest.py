@@ -26,7 +26,7 @@ def setup_logging():
 def base_url(request):
     return (
         os.getenv("APP_BASE_URL")
-        or "http://127.0.0.1:5173"
+        or "http://server"
     )
 
 
