@@ -30,8 +30,8 @@ class BaseElement:
         return self.element.text
 
     def is_present(self):
-        element = self.find_element()
-        return element.is_displayed()
+        elements = self.find_elements()
+        return any(element.is_displayed() for element in elements)
 
     def is_displayed(self):
         return self.element.is_displayed()
