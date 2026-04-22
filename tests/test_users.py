@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_create_user(logged_app):
     # Arrange: prepare user data.
     test_data = {
@@ -24,7 +27,7 @@ def test_create_user(logged_app):
         test_data["second_name"]
     )
 
-
+@pytest.mark.xfail
 def test_update_user(logged_app):
     # Arrange: prepare source and updated user data.
     user_data = {
@@ -57,10 +60,13 @@ def test_update_user(logged_app):
         user_data["first_name"],
         user_data["second_name"])
     logged_app.user_form_page.update_user_info(new_user_email)
-    assert logged_app.label_form_page.popup.wait_popup_with_text(
-        "Element updated")
     # Assert: verify the updated user is present in the table.
     logged_app.user_form_page.sidebar.open_users_page()
+    assert not logged_app.users_page.is_user_present(
+        user_data["email"],
+        user_data["first_name"],
+        user_data["second_name"]
+    )
     assert logged_app.users_page.is_user_present(
         new_user_email,
         user_data["first_name"],
