@@ -10,8 +10,7 @@ def test_login(app):
             "Welcome to the administration")
     assert app.dashboard_page.header.profile_button.text == "Jane Doe"
 
-
-@pytest.mark.xfail
+@pytest.mark.skip(reason="Layout bug")
 def test_logout(logged_app):
     # Act: log out from the application.
     logged_app.dashboard_page.header.logout()
