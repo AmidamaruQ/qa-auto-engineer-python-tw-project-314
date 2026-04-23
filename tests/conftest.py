@@ -1,97 +1,29 @@
-import os
+def pytest_configure(config):
+    markers = [
+        "smoke: smoke test",
+        "step_3: auth test",
+        "step_4_viewList: users list test",
+        "step_4_createUser: users create test",
+        "step_4_editUser: users edit test",
+        "step_4_deleteOne: users delete one test",
+        "step_4_deleteAll: users delete all test",
+        "step_5_viewList: statuses list test",
+        "step_5_createStatus: statuses create test",
+        "step_5_editStatus: statuses edit test",
+        "step_5_deleteOne: statuses delete one test",
+        "step_5_deleteAll: statuses delete all test",
+        "step_6_viewList: labels list test",
+        "step_6_createLabel: labels create test",
+        "step_6_editLabel: labels edit test",
+        "step_6_deleteOne: labels delete one test",
+        "step_6_deleteAll: labels delete all test",
+        "step_7_viewBoard: tasks board test",
+        "step_7_filtersTasks: tasks filter test",
+        "step_7_createTasks: tasks create test",
+        "step_7_editTasks: tasks edit test",
+        "step_7_dragAndDropTasks: tasks dnd test",
+        "step_7_deleteTasks: tasks delete test",
+    ]
 
-import pytest
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-
-from pages.pages import Pages
-from utils import configure_logging, get_logger
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--base-url",
-        action="store",
-        default=None,
-        help="Base URL for UI tests.",
-    )
-
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_logging():
-    configure_logging()
-
-
-@pytest.fixture(scope="session")
-def base_url(request):
-    implementation = os.getenv("IMPLEMENTATION")
-    option_value = request.config.getoption("--base-url")
-
-    if option_value:
-        return option_value
-
-    if implementation:
-        return f"http://{implementation}.test"
-
-    return os.getenv("APP_BASE_URL", "http://localhost:5173")
-
-
-@pytest.fixture(scope="session")
-def credentials():
-    return {
-        "username": os.getenv("LOGIN", "admin"),
-        "password": os.getenv("PASSWORD", "adminhexlet1122"),
-    }
-
-
-@pytest.fixture(scope="session")
-def expected_profile_name():
-    return os.getenv("PROFILE_NAME", "Jane Doe")
-
-
-@pytest.fixture
-def driver():
-    logger = get_logger("driver")
-    options = Options()
-    chrome_binary = os.getenv("CHROME_BINARY")
-
-    if chrome_binary:
-        options.binary_location = chrome_binary
-
-    options.add_argument("--headless=new")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--remote-debugging-port=9222")
-    options.add_argument("--disable-software-rasterizer")
-
-    logger.info("Starting Chrome browser")
-    chromedriver_path = os.getenv("CHROMEDRIVER_PATH")
-    service = (
-        Service(executable_path=chromedriver_path)
-        if chromedriver_path
-        else Service()
-    )
-    browser = webdriver.Chrome(service=service, options=options)
-    yield browser
-    logger.info("Closing Chrome browser")
-    browser.quit()
-
-
-@pytest.fixture
-def app(driver, base_url):
-    logger = get_logger("app")
-    app = Pages(driver)
-    logger.info("Opening base URL: %s", base_url)
-    app.base_page.open(base_url)
-    return app
-
-
-@pytest.fixture
-def logged_app(app, credentials):
-    logger = get_logger("app")
-    logger.info("Authorizing test user")
-    app.login_page.login(credentials["username"], credentials["password"])
-    return app
+    for marker in markers:
+        config.addinivalue_line("markers", marker)

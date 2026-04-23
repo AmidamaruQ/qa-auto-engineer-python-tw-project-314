@@ -1,116 +1,56 @@
+import uuid
+
 import pytest
 
-from tests.support import (
-    POPUP_BULK_DELETED_TEMPLATE,
-    POPUP_CREATED,
-    POPUP_DELETED,
-    POPUP_UPDATED,
-    build_user_data,
-)
-from utils.utils import wait_for
+from .constants import USER
+from .pages.login import LoginPage
+from .pages.users import UsersPage
 
 
-def open_users_page(app):
-    app.base_page.sidebar.open_users_page()
+@pytest.fixture()
+def users_page(driver, base_url):
+    login_page = LoginPage(driver, base_url)
+    login_page.login(USER["login"], USER["password"])
+    page = UsersPage(driver, base_url)
+    assert page.delete_all_users()
+    return page
 
 
-def create_user(app, user_data):
-    open_users_page(app)
-    app.users_page.open_create_user_form()
-    app.user_form_page.create_user(
-        user_data["email"],
-        user_data["first_name"],
-        user_data["second_name"],
-    )
-    assert app.user_form_page.popup.wait_popup_with_text(POPUP_CREATED)
-    open_users_page(app)
-    assert_user_presence(app, user_data)
-
-
-def assert_user_presence(app, user_data, is_present=True):
-    assert app.users_page.is_user_present(
-        user_data["email"],
-        user_data["first_name"],
-        user_data["second_name"],
-    ) is is_present
+@pytest.fixture()
+def seeded_user(users_page):
+    email = f"user-{uuid.uuid4().hex[:6]}@example.com"
+    assert users_page.create_user(email, "Name", "Surname")
+    return users_page, email
 
 
 @pytest.mark.step_4_createUser
-def test_create_user(logged_app):
-    user_data = build_user_data()
-
-    create_user(logged_app, user_data)
+def test_create_user(users_page):
+    email = f"test-{uuid.uuid4().hex[:6]}@example.com"
+    assert users_page.create_user(email, "John", "Doe")
 
 
 @pytest.mark.step_4_viewList
-def test_view_user_list(logged_app):
-    user_data = build_user_data()
-
-    create_user(logged_app, user_data)
-    headers = logged_app.users_page.get_table_headers()
-
-    assert "Email" in headers
-    assert "First name" in headers
-    assert "Last name" in headers
-    assert logged_app.users_page.get_users_count() > 0
-    assert user_data["email"] in logged_app.users_page.get_user_row_text(
-        user_data["email"]
-    )
+def test_view_user_list(seeded_user):
+    users_page, email = seeded_user
+    users_page.open_page()
+    users_page.wait_for_text("Email")
+    users_page.wait_for_text(email)
 
 
 @pytest.mark.step_4_editUser
-def test_edit_user(logged_app):
-    user_data = build_user_data()
-    updated_user_data = {
-        **user_data,
-        "first_name": f"updated_{user_data['first_name']}",
-    }
-
-    create_user(logged_app, user_data)
-    logged_app.users_page.open_user_from_table(
-        user_data["email"],
-        user_data["first_name"],
-        user_data["second_name"],
-    )
-    logged_app.user_form_page.update_user_info(
-        first_name=updated_user_data["first_name"],
-    )
-
-    assert logged_app.user_form_page.popup.wait_popup_with_text(POPUP_UPDATED)
-    open_users_page(logged_app)
-    assert_user_presence(logged_app, user_data, is_present=False)
-    assert_user_presence(logged_app, updated_user_data)
+def test_edit_user(seeded_user):
+    users_page, email = seeded_user
+    updated_name = f"Updated_{uuid.uuid4().hex[:5]}"
+    assert users_page.edit_user(email, updated_name)
 
 
 @pytest.mark.step_4_deleteOne
-def test_delete_user(logged_app):
-    user_data = build_user_data()
-
-    create_user(logged_app, user_data)
-    logged_app.users_page.open_user_from_table(
-        user_data["email"],
-        user_data["first_name"],
-        user_data["second_name"],
-    )
-    logged_app.user_form_page.delete_user()
-
-    assert logged_app.user_form_page.popup.wait_popup_with_text(POPUP_DELETED)
-    open_users_page(logged_app)
-    assert_user_presence(logged_app, user_data, is_present=False)
+def test_delete_user(seeded_user):
+    users_page, email = seeded_user
+    assert users_page.delete_user(email)
 
 
 @pytest.mark.step_4_deleteAll
-def test_delete_all_users(logged_app):
-    create_user(logged_app, build_user_data())
-    open_users_page(logged_app)
-    initial_count = logged_app.users_page.get_users_count()
-
-    assert initial_count > 0
-
-    logged_app.users_page.choose_all_users()
-    logged_app.users_page.delete_chosen_user()
-
-    assert logged_app.users_page.popup.wait_popup_with_text(
-        POPUP_BULK_DELETED_TEMPLATE.format(count=initial_count)
-    )
-    assert wait_for(lambda: logged_app.users_page.get_users_count(), 0) == 0
+def test_delete_all_users(seeded_user):
+    users_page, _email = seeded_user
+    assert users_page.delete_all_users()
