@@ -8,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from settings import DEFAULT_TIMEOUT
-from utils.text import build_xpath_by_text
 
 
 class BasePage:
@@ -36,7 +35,11 @@ class BasePage:
             self.driver.execute_script("arguments[0].click();", element)
 
     def wait_for_text(self, text: str, tag: str = "*"):
-        locator = (By.XPATH, build_xpath_by_text(tag, text))
+        normalized_tag = tag or "*"
+        locator = (
+            By.XPATH,
+            f"//{normalized_tag}[normalize-space()='{text}']",
+        )
         return self.wait.until(EC.visibility_of_element_located(locator))
 
     def click_by_text(self, text: str, tag: str = "*"):
@@ -51,17 +54,24 @@ class BasePage:
         return element
 
     def clear_input(self, selector: str):
-        field = self.wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-        )
+        locator = (By.CSS_SELECTOR, selector)
+        field = self.wait.until(EC.element_to_be_clickable(locator))
         self.safe_click(field)
         field.send_keys(Keys.CONTROL, "a")
         field.send_keys(Keys.DELETE)
 
         self.driver.execute_script(
             (
-                "if (arguments[0].value !== '') {"
-                "  arguments[0].value = '';"
+                "const element = arguments[0];"
+                "const prototype = Object.getPrototypeOf(element);"
+                "const descriptor = Object.getOwnPropertyDescriptor("
+                "  prototype,"
+                "  'value'"
+                ");"
+                "if (descriptor && descriptor.set) {"
+                "  descriptor.set.call(element, '');"
+                "} else {"
+                "  element.value = '';"
                 "}"
                 "arguments[0].dispatchEvent("
                 "  new Event('input', { bubbles: true })"
@@ -74,9 +84,11 @@ class BasePage:
         )
 
         self.wait.until(
-            lambda _d: (field.get_attribute("value") or "") == ""
+            lambda d: (
+                d.find_element(*locator).get_attribute("value") or ""
+            ) == ""
         )
-        return field
+        return self.driver.find_element(*locator)
 
     def fill_input(self, selector: str, value: str):
         field = self.clear_input(selector)
@@ -101,7 +113,10 @@ class BasePage:
 
         self.safe_click(trigger)
 
-        option_locator = (By.XPATH, build_xpath_by_text("li", item_text))
+        option_locator = (
+            By.XPATH,
+            f"//li[normalize-space()='{item_text}']",
+        )
         option = self.wait.until(
             EC.visibility_of_element_located(option_locator)
         )
