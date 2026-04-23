@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from selenium.common.exceptions import (
     NoSuchElementException,
     WebDriverException,
@@ -9,8 +7,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from ..constants import DEFAULT_TIMEOUT
-from ..utils.text import build_xpath_by_text
+from tests.constants import DEFAULT_TIMEOUT
+from utils.text import build_xpath_by_text
 
 
 class BasePage:

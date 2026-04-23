@@ -2,33 +2,26 @@ import uuid
 
 import pytest
 
-from .constants import USER
-from .pages.login import LoginPage
-from .pages.statuses import StatusesPage
+
+@pytest.fixture
+def clean_statuses_page(statuses_page):
+    assert statuses_page.delete_all_statuses()
+    return statuses_page
 
 
-@pytest.fixture()
-def statuses_page(driver, base_url):
-    login_page = LoginPage(driver, base_url)
-    login_page.login(USER["login"], USER["password"])
-    page = StatusesPage(driver, base_url)
-    assert page.delete_all_statuses()
-    return page
-
-
-@pytest.fixture()
-def seeded_status(statuses_page):
+@pytest.fixture
+def seeded_status(clean_statuses_page):
     name = f"Status_{uuid.uuid4().hex[:5]}"
     slug = f"slug-{uuid.uuid4().hex[:5]}"
-    assert statuses_page.create_status(name, slug)
-    return statuses_page, name, slug
+    assert clean_statuses_page.create_status(name, slug)
+    return clean_statuses_page, name, slug
 
 
 @pytest.mark.step_5_createStatus
-def test_create_status(statuses_page):
+def test_create_status(clean_statuses_page):
     name = f"Backlog_{uuid.uuid4().hex[:5]}"
     slug = f"backlog-{uuid.uuid4().hex[:5]}"
-    assert statuses_page.create_status(name, slug)
+    assert clean_statuses_page.create_status(name, slug)
 
 
 @pytest.mark.step_5_viewList

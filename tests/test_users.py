@@ -2,31 +2,24 @@ import uuid
 
 import pytest
 
-from .constants import USER
-from .pages.login import LoginPage
-from .pages.users import UsersPage
+
+@pytest.fixture
+def clean_users_page(users_page):
+    assert users_page.delete_all_users()
+    return users_page
 
 
-@pytest.fixture()
-def users_page(driver, base_url):
-    login_page = LoginPage(driver, base_url)
-    login_page.login(USER["login"], USER["password"])
-    page = UsersPage(driver, base_url)
-    assert page.delete_all_users()
-    return page
-
-
-@pytest.fixture()
-def seeded_user(users_page):
+@pytest.fixture
+def seeded_user(clean_users_page):
     email = f"user-{uuid.uuid4().hex[:6]}@example.com"
-    assert users_page.create_user(email, "Name", "Surname")
-    return users_page, email
+    assert clean_users_page.create_user(email, "Name", "Surname")
+    return clean_users_page, email
 
 
 @pytest.mark.step_4_createUser
-def test_create_user(users_page):
+def test_create_user(clean_users_page):
     email = f"test-{uuid.uuid4().hex[:6]}@example.com"
-    assert users_page.create_user(email, "John", "Doe")
+    assert clean_users_page.create_user(email, "John", "Doe")
 
 
 @pytest.mark.step_4_viewList

@@ -2,7 +2,8 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from ..constants import DASHBOARD_TITLE
+from tests.constants import DASHBOARD_TITLE
+
 from .base import BasePage
 
 

@@ -2,20 +2,10 @@ import uuid
 
 import pytest
 
-from .constants import USER
-from .pages.login import LoginPage
-from .pages.statuses import StatusesPage
-from .pages.tasks import TasksPage
-from .pages.users import UsersPage
 
-
-@pytest.fixture()
-def tasks_setup(driver, base_url):
-    login_page = LoginPage(driver, base_url)
-    login_page.login(USER["login"], USER["password"])
-
-    statuses_page = StatusesPage(driver, base_url)
-    statuses_page.delete_all_statuses()
+@pytest.fixture
+def tasks_setup(statuses_page, users_page, tasks_page):
+    assert statuses_page.delete_all_statuses()
     primary_status_name = f"Status_{uuid.uuid4().hex[:5]}"
     primary_status_slug = f"primary-{uuid.uuid4().hex[:5]}"
     secondary_status_name = f"Status_{uuid.uuid4().hex[:5]}"
@@ -30,13 +20,11 @@ def tasks_setup(driver, base_url):
         secondary_status_slug,
     )
 
-    users_page = UsersPage(driver, base_url)
     email = f"tasker_{uuid.uuid4().hex[:5]}@example.com"
     first_name = f"Tasker{uuid.uuid4().hex[:4]}"
     last_name = "Tester"
     assert users_page.create_user(email, first_name, last_name)
 
-    tasks_page = TasksPage(driver, base_url)
     tasks_page.open_page()
 
     return {
