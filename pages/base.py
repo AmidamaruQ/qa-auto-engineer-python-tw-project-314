@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests.constants import DEFAULT_TIMEOUT
+from settings import DEFAULT_TIMEOUT
 from utils.text import build_xpath_by_text
 
 

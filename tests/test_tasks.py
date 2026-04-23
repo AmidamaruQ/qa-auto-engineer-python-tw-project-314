@@ -36,7 +36,6 @@ def tasks_setup(statuses_page, users_page, tasks_page):
     }
 
 
-@pytest.mark.step_7_createTasks
 def test_create_task_shows_card(tasks_setup):
     ctx = tasks_setup
     title = f"Task_{uuid.uuid4().hex[:6]}"
@@ -50,7 +49,6 @@ def test_create_task_shows_card(tasks_setup):
     assert ctx["page"].task_exists(title)
 
 
-@pytest.mark.step_7_editTasks
 def test_edit_task_updates_title(tasks_setup):
     ctx = tasks_setup
     original_title = f"Task_{uuid.uuid4().hex[:6]}"
@@ -69,7 +67,6 @@ def test_edit_task_updates_title(tasks_setup):
     assert ctx["page"].task_exists(updated_title)
 
 
-@pytest.mark.step_7_dragAndDropTasks
 def test_change_task_status_moves_card(tasks_setup):
     ctx = tasks_setup
     title = f"Task_{uuid.uuid4().hex[:6]}"
@@ -87,7 +84,6 @@ def test_change_task_status_moves_card(tasks_setup):
     assert ctx["page"].is_task_in_status(title, ctx["alt_status"])
 
 
-@pytest.mark.step_7_viewBoard
 def test_view_task_details(tasks_setup):
     ctx = tasks_setup
     title = f"Task_{uuid.uuid4().hex[:6]}"

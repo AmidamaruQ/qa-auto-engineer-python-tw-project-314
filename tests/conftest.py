@@ -1,20 +1,13 @@
 import logging
-import re
 from pathlib import Path
 
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from config import TestConfig, load_config
 from pages.app import Pages
-from tests.config import TestConfig, load_config
 from utils.logging import configure_logging
-
-
-def _ensure_basic_logging(level: str) -> None:
-    root = logging.getLogger()
-    if not root.handlers:
-        logging.basicConfig(level=level)
 
 
 @pytest.fixture(scope="session")
@@ -24,7 +17,7 @@ def test_config() -> TestConfig:
 
 @pytest.fixture(scope="session")
 def test_logger(test_config: TestConfig) -> logging.Logger:
-    _ensure_basic_logging(test_config.log_level)
+    test_config.log_dir.mkdir(parents=True, exist_ok=True)
     logger = configure_logging(
         test_config.log_level,
         test_config.log_dir,
@@ -96,62 +89,21 @@ def _new_browser(
     return driver
 
 
-def _safe_test_name(nodeid: str) -> str:
-    name = nodeid.replace("::", "__").replace("/", "_")
-    return re.sub(r"[^\w.-]", "_", name)
-
-
-def _save_screenshot(
-    driver: webdriver.Chrome,
-    target_dir: Path,
-    nodeid: str,
-    logger: logging.Logger,
-) -> None:
-    filename = f"{_safe_test_name(nodeid)}.png"
-    path = target_dir / filename
-    try:
-        success = driver.save_screenshot(str(path))
-    except Exception as error:  # noqa: BLE001
-        logger.error("Failed to create screenshot %s: %s", path, error)
-        return
-
-    if success:
-        logger.info("Saved screenshot to %s", path)
-    else:
-        logger.warning(
-            "Driver did not report success when saving screenshot to %s",
-            path,
-        )
-
-
 @pytest.fixture
 def driver(
     base_url: str,
     test_config: TestConfig,
     test_logger: logging.Logger,
-    request: pytest.FixtureRequest,
 ):
     test_logger.debug(
-        "Creating new browser instance for %s",
-        request.node.nodeid,
+        "Creating new browser instance",
     )
     browser = _new_browser(base_url, test_config)
-    try:
-        yield browser
-    finally:
-        outcome = getattr(request.node, "rep_call", None)
-        if outcome and outcome.failed:
-            _save_screenshot(
-                browser,
-                test_config.screenshots_dir,
-                request.node.nodeid,
-                test_logger,
-            )
-        test_logger.debug(
-            "Closing browser instance for %s",
-            request.node.nodeid,
-        )
-        browser.quit()
+    yield browser
+    test_logger.debug(
+        "Closing browser instance",
+    )
+    browser.quit()
 
 
 @pytest.fixture
@@ -190,13 +142,3 @@ def statuses_page(logged_in_pages):
 @pytest.fixture
 def tasks_page(logged_in_pages):
     return logged_in_pages.tasks
-
-
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(
-    item: pytest.Item,
-    call: pytest.CallInfo,
-):
-    outcome = yield
-    result = outcome.get_result()
-    setattr(item, f"rep_{result.when}", result)

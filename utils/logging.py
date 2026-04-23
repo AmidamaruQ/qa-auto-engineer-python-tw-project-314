@@ -17,6 +17,7 @@ def configure_logging(
         return logger
 
     logger.setLevel(level)
+    logger.propagate = False
 
     if log_dir:
         log_dir.mkdir(parents=True, exist_ok=True)

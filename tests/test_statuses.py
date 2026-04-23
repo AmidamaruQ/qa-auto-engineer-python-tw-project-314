@@ -17,14 +17,12 @@ def seeded_status(clean_statuses_page):
     return clean_statuses_page, name, slug
 
 
-@pytest.mark.step_5_createStatus
 def test_create_status(clean_statuses_page):
     name = f"Backlog_{uuid.uuid4().hex[:5]}"
     slug = f"backlog-{uuid.uuid4().hex[:5]}"
     assert clean_statuses_page.create_status(name, slug)
 
 
-@pytest.mark.step_5_viewList
 def test_view_statuses_list(seeded_status):
     statuses_page, name, slug = seeded_status
     statuses_page.open_page()
@@ -35,7 +33,6 @@ def test_view_statuses_list(seeded_status):
     assert row_values["slug"] == slug
 
 
-@pytest.mark.step_5_editStatus
 def test_edit_status(seeded_status):
     statuses_page, name, _slug = seeded_status
     new_name = f"{name}_Updated"
@@ -43,13 +40,11 @@ def test_edit_status(seeded_status):
     assert statuses_page.edit_status(name, new_name, new_slug)
 
 
-@pytest.mark.step_5_deleteOne
 def test_delete_status(seeded_status):
     statuses_page, name, _slug = seeded_status
     assert statuses_page.delete_status(name)
 
 
-@pytest.mark.step_5_deleteAll
 def test_delete_all_statuses(seeded_status):
     statuses_page, _name, _slug = seeded_status
     assert statuses_page.delete_all_statuses()
