@@ -11,6 +11,7 @@ CREATE_BUTTON_LOCATOR = (By.XPATH, "//a[@aria-label='Create']")
 DELETE_BUTTON_LOCATOR = (By.XPATH, "//button[@aria-label='Delete']")
 TABLE_HEADERS_LOCATOR = (By.XPATH, "//thead//th")
 TABLE_ROWS_LOCATOR = (By.XPATH, "//tbody/tr")
+ROW_CHECKBOXES_LOCATOR = (By.XPATH, "//tbody//input[@type='checkbox']")
 
 
 class LabelsPage(BasePage):
@@ -45,6 +46,12 @@ class LabelsPage(BasePage):
 
     def delete_chosen_label(self):
         return self.delete_button.click()
+
+    def choose_all_labels(self):
+        checkboxes = self.driver.find_elements(*ROW_CHECKBOXES_LOCATOR)
+
+        for checkbox in checkboxes:
+            self.driver.execute_script("arguments[0].click();", checkbox)
 
     def open_create_label(self):
         return self.create_button.click()

@@ -1,17 +1,44 @@
 import pytest
+from selenium.webdriver.common.by import By
 
 
-def test_login(app):
-    # Act: log in with configured credentials.
-    app.login_page.login("admin", "hexletadmin1122")
-    # Assert: verify the dashboard is opened for the user.
-    assert app.dashboard_page.header.header_title.is_displayed()
-    assert (app.dashboard_page.header.header_title.text ==
-            "Welcome to the administration")
-    assert app.dashboard_page.header.profile_button.text == "Jane Doe"
+@pytest.mark.smoke
+def test_login_page_elements(app):
+    assert app.login_page.username_input.is_displayed()
+    assert app.login_page.password_input.is_displayed()
+    assert app.login_page.submit_button.is_displayed()
 
+
+@pytest.mark.step_3
+def test_login_form_validation(app):
+    app.login_page.click_submit()
+
+    assert app.login_page.driver.find_element(
+        By.NAME,
+        "username",
+    ).get_attribute("aria-invalid") == "true"
+    assert app.login_page.driver.find_element(
+        By.NAME,
+        "password",
+    ).get_attribute("aria-invalid") == "true"
+    assert app.login_page.submit_button.is_displayed()
+
+
+@pytest.mark.step_3
+def test_login(logged_app, expected_profile_name):
+    assert logged_app.dashboard_page.header.header_title.is_displayed()
+    assert (
+        logged_app.dashboard_page.header.header_title.text
+        == "Welcome to the administration"
+    )
+    assert logged_app.dashboard_page.header.profile_button.text == (
+        expected_profile_name
+    )
+
+
+@pytest.mark.step_3
 def test_logout(logged_app):
-    # Act: log out from the application.
     logged_app.dashboard_page.header.logout()
-    # Assert: verify the login form is shown again.
+
     assert logged_app.login_page.username_input.is_displayed()
+    assert logged_app.login_page.password_input.is_displayed()

@@ -1,4 +1,7 @@
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    StaleElementReferenceException,
+)
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -31,8 +34,18 @@ class BaseElement:
         return self.element.text
 
     def is_present(self):
-        elements = self.find_elements()
-        return any(element.is_displayed() for element in elements)
+        for _ in range(3):
+            elements = self.find_elements()
+
+            try:
+                return any(element.is_displayed() for element in elements)
+            except StaleElementReferenceException:
+                self.logger.info(
+                    "Stale element while checking presence, retrying: %s",
+                    self.locator,
+                )
+
+        return False
 
     def is_displayed(self):
         element = self.element

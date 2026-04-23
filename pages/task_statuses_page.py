@@ -74,7 +74,7 @@ class TaskStatusesPage(BasePage):
         checkboxes = self.driver.find_elements(*ROW_CHECKBOXES_LOCATOR)
 
         for checkbox in checkboxes:
-            checkbox.click()
+            self.driver.execute_script("arguments[0].click();", checkbox)
 
     def is_task_status_present(self, name, slug):
         return self._status_row(name, slug).is_present()
