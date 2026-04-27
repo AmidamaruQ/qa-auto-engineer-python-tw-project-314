@@ -1,5 +1,4 @@
-.PHONY: install start stop check lint test test-coverage coverage-xml
-
+.PHONY: install start stop check lint test test-coverage
 install:
 	uv sync --group dev
 
@@ -27,6 +26,3 @@ test-coverage:
 		--cov=settings \
 		--cov-report=xml \
 		tests/
-
-coverage-xml:
-	$(MAKE) test-coverage

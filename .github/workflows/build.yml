@@ -45,7 +45,7 @@ jobs:
         run: make check
 
       - name: Generate coverage report
-        run: make test-coverage
+        run: test-coverage
 
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5
